@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Voice AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" id="main-container" style="display: none;">
+        <!-- Main Voice Control -->
+        <div class="voice-interface">
+            <div class="user-info">
+                <span id="userDisplay" class="user-display">Welcome!</span>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+            <div class="logo">🎤</div>
+            <h1 id="title">Voice AI Assistant</h1>
+            
+            <div class="status-display">
+                <p id="status">Click mic to start speaking...</p>
+                <p id="listening-text" class="listening-text"></p>
+            </div>
+
+            <!-- Microphone Button -->
+            <button id="micBtn" class="mic-button">
+                🎤
+            </button>
+
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                </select>
+            </div>
+
+            <!-- Stop Button -->
+            <button id="stopBtn" class="stop-button hidden">
+                ⏹ Stop
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
