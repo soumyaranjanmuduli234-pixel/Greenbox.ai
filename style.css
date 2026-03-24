@@ -764,8 +764,20 @@ body::before {
     .form-group input {
         padding: 14px 16px;
     }
+
+    .language-selector select {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .settings-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
 }
 
+@media (max-width: 768px) {
     .language-selector select {
         padding: 8px 12px;
         font-size: 14px;
