@@ -1,6 +1,54 @@
 # Voice AI Assistant
 
-A modern, offline voice-controlled AI assistant for coding, homework, cooking, and general knowledge.
+A modern, offline voice-controlled AI assistant for coding, homework, cooking, and general knowledge with advanced features.
+
+## ✨ New Features Added
+
+### 🧠 Smart Context Memory
+- Remembers previous conversations
+- Provides contextual follow-up responses
+- Maintains conversation history for better interactions
+
+### 🎨 Advanced Animations
+- Glassmorphism UI design
+- Floating particle animations in background
+- Smooth transitions and hover effects
+
+### 📱 PWA Support
+- Install on phone as native app
+- Works offline with cached resources
+- App-like experience on mobile devices
+
+### ⚡ Offline Mode
+- Service worker for offline functionality
+- Cached responses for offline use
+- Network-first caching strategy
+
+### 🎵 Sound Effects
+- Audio feedback for mic on/off
+- Processing sound effects
+- Immersive user experience
+
+### 📊 Chat History
+- Save all conversations locally
+- View previous interactions
+- Export chat history as JSON
+- Clear history functionality
+
+### 🔍 Search Suggestions
+- Auto-complete search input
+- Keyboard navigation (arrow keys)
+- Click or press Enter to select
+
+### 🌙 Dark/Light Theme Toggle
+- Switch between dark and light themes
+- Theme preference saved locally
+- Smooth theme transitions
+
+### 📱 Voice Commands
+- "Change language" - Switch between English/Hindi
+- "Clear history" - Remove all chat history
+- "Toggle theme" - Switch theme
 
 ## Features
 
@@ -13,6 +61,11 @@ A modern, offline voice-controlled AI assistant for coding, homework, cooking, a
 - 🔐 **User Authentication**: Login/Register system with local storage
 - 📱 **Responsive Design**: Works on desktop and mobile devices
 - 🎨 **Modern UI**: Glassmorphism design with smooth animations
+- 🧠 **Context Memory**: Remembers conversation context
+- 📊 **Chat History**: Persistent conversation storage
+- 🔍 **Search Suggestions**: Auto-complete functionality
+- 🌙 **Theme Toggle**: Dark/Light mode switching
+- 📱 **PWA Ready**: Installable web app with offline support
 
 ## Getting Started
 
@@ -23,8 +76,12 @@ A modern, offline voice-controlled AI assistant for coding, homework, cooking, a
 
 2. **Using the Assistant**:
    - Click the microphone button to start continuous listening
+   - Type in the search box for suggestions
    - Ask questions about programming, coding, web development, cooking recipes, or general knowledge
+   - Use voice commands: "change language", "clear history", "toggle theme"
    - Switch between English and Hindi using the language selector
+   - Toggle between dark/light themes using the theme button
+   - View chat history using the history button
    - The AI will respond with voice and helpful information
 
 ## Available Commands
@@ -72,24 +129,43 @@ A modern, offline voice-controlled AI assistant for coding, homework, cooking, a
 ## File Structure
 
 ```
-chatboot site/
+voice-ai-assistant/
 ├── index.html          # Main voice assistant interface
 ├── login.html          # User login page
 ├── register.html       # User registration page
 ├── forgot-password.html # Password reset page
-├── style.css           # Modern styling with glassmorphism
-├── script.js           # Main application logic
+├── style.css           # Modern styling with glassmorphism & themes
+├── script.js           # Main application logic with all new features
 ├── auth.js             # Authentication system
-└── README.md           # This file
+├── manifest.json       # PWA manifest for app installation
+├── sw.js              # Service worker for offline functionality
+└── README.md           # This documentation
 ```
 
 ## Technical Details
 
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Voice**: Web Speech API (Speech Recognition & Synthesis)
-- **Storage**: Local Storage for user data
-- **Design**: Glassmorphism UI with CSS Grid/Flexbox
+- **Audio**: Web Audio API for sound effects
+- **Storage**: Local Storage for user data, chat history, and preferences
+- **PWA**: Service Worker for offline functionality and app installation
+- **Design**: Glassmorphism UI with CSS Grid/Flexbox and particle animations
 - **Responsive**: Mobile-first design approach
+- **Features**: Context memory, theme switching, search suggestions, voice commands
+
+## Browser Support
+
+- Chrome/Edge (recommended for full voice features)
+- Firefox (partial voice support)
+- Safari (partial voice support)
+- Mobile browsers (PWA installable)
+
+## Privacy & Security
+
+- All data stored locally in browser
+- No external API calls or data transmission
+- User authentication handled client-side
+- Chat history saved locally only
 
 ## Browser Requirements
 

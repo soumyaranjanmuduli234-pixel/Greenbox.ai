@@ -36,12 +36,73 @@ const title = document.getElementById('title');
 const userDisplay = document.getElementById('userDisplay');
 const logoutBtn = document.getElementById('logoutBtn');
 
+// New DOM Elements
+const themeToggle = document.getElementById('themeToggle');
+const historyBtn = document.getElementById('historyBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const chatHistory = document.getElementById('chatHistory');
+const closeHistory = document.getElementById('closeHistory');
+const historyList = document.getElementById('historyList');
+const clearHistory = document.getElementById('clearHistory');
+const exportHistory = document.getElementById('exportHistory');
+const searchInput = document.getElementById('searchInput');
+const suggestions = document.getElementById('suggestions');
+const particleCanvas = document.getElementById('particleCanvas');
+
 // Voice Recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
+// Audio Context for sound effects
+let audioContext;
+let soundEnabled = true;
+
+// Chat History and Context Memory
+let chatHistoryData = [];
+let conversationContext = [];
+const MAX_CONTEXT_LENGTH = 10;
+
+// Particle System
+let particles = [];
+let animationId;
+
+// Search Suggestions
+const searchSuggestions = [
+    'What is programming?',
+    'How to learn coding?',
+    'Calculate 25 + 30',
+    'What is Python?',
+    'HTML tutorial',
+    'CSS tutorial',
+    'JavaScript tutorial',
+    'Create a website',
+    'GST on 1000 rupees',
+    'Area of circle',
+    'Solve math problem',
+    'Cooking recipes',
+    'Chicken biryani recipe',
+    'Pizza recipe',
+    'General knowledge',
+    'India history',
+    'Capital of India',
+    'Prime minister of India',
+    'Change language',
+    'Clear history'
+];
+
 // Check authentication on page load
 window.addEventListener('load', () => {
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered successfully:', registration);
+            })
+            .catch((error) => {
+                console.log('Service Worker registration failed:', error);
+            });
+    }
+
     const currentUser = JSON.parse(localStorage.getItem('voiceAI_currentUser') || 'null');
 
     if (!currentUser) {
@@ -58,6 +119,7 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         hideLoadingAnimation();
         initializeAI();
+        initializeNewFeatures();
     }, 2000);
 });
 
@@ -180,6 +242,7 @@ logoutBtn.addEventListener('click', () => {
 micBtn.addEventListener('click', () => {
     if (isContinuousMode) {
         // Stop continuous listening
+        playSound(400, 0.2, 'triangle'); // Stop sound
         isContinuousMode = false;
         isListening = false;
         recognition?.stop();
@@ -188,6 +251,7 @@ micBtn.addEventListener('click', () => {
         statusText.style.color = '';
     } else {
         // Start continuous listening
+        playSound(600, 0.2, 'sine'); // Start sound
         startContinuousListening();
     }
 });
@@ -267,6 +331,9 @@ recognition?.addEventListener('result', (e) => {
 });
 
 async function processUserInput(userMessage) {
+    // Play processing sound
+    playSound(800, 0.1, 'sine');
+
     // Don't stop listening in continuous mode
     if (!isContinuousMode) {
         isListening = false;
@@ -279,6 +346,9 @@ async function processUserInput(userMessage) {
     try {
         const response = await getAIResponse(userMessage);
         await speakResponse(response);
+
+        // Add to chat history
+        addToHistory(userMessage, response);
 
         // Resume listening after response only if not in continuous mode
         if (!isContinuousMode) {
@@ -1426,3 +1496,378 @@ async function speakResponse(text) {
 }
 
 updateUI();
+
+// ===== NEW FEATURES IMPLEMENTATION =====
+
+// Initialize all new features
+function initializeNewFeatures() {
+    initializeAudioContext();
+    initializeParticles();
+    loadChatHistory();
+    loadThemePreference();
+    setupEventListeners();
+}
+
+// Audio Context for sound effects
+function initializeAudioContext() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+        console.warn('Audio context not supported');
+    }
+}
+
+// Play sound effects
+function playSound(frequency, duration, type = 'sine') {
+    if (!audioContext || !soundEnabled) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.type = type;
+
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+}
+
+// Particle System
+function initializeParticles() {
+    const canvas = particleCanvas;
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Create particles
+    for (let i = 0; i < 50; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 3 + 1,
+            opacity: Math.random() * 0.5 + 0.2
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(particle => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+
+            // Wrap around edges
+            if (particle.x < 0) particle.x = canvas.width;
+            if (particle.x > canvas.width) particle.x = 0;
+            if (particle.y < 0) particle.y = canvas.height;
+            if (particle.y > canvas.height) particle.y = 0;
+
+            // Draw particle
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(102, 126, 234, ${particle.opacity})`;
+            ctx.fill();
+        });
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+// Chat History Management
+function loadChatHistory() {
+    const saved = localStorage.getItem('voiceAI_chatHistory');
+    if (saved) {
+        chatHistoryData = JSON.parse(saved);
+        updateHistoryDisplay();
+    }
+}
+
+function saveChatHistory() {
+    localStorage.setItem('voiceAI_chatHistory', JSON.stringify(chatHistoryData));
+}
+
+function addToHistory(query, response) {
+    const entry = {
+        timestamp: new Date().toISOString(),
+        query: query,
+        response: response
+    };
+
+    chatHistoryData.unshift(entry);
+
+    // Keep only last 100 entries
+    if (chatHistoryData.length > 100) {
+        chatHistoryData = chatHistoryData.slice(0, 100);
+    }
+
+    saveChatHistory();
+    updateHistoryDisplay();
+
+    // Update context memory
+    updateConversationContext(query, response);
+}
+
+function updateHistoryDisplay() {
+    historyList.innerHTML = '';
+
+    if (chatHistoryData.length === 0) {
+        historyList.innerHTML = '<div class="history-item"><div class="response">No chat history yet</div></div>';
+        return;
+    }
+
+    chatHistoryData.forEach((entry, index) => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.onclick = () => loadHistoryItem(entry);
+
+        const timestamp = new Date(entry.timestamp).toLocaleString();
+        item.innerHTML = `
+            <div class="timestamp">${timestamp}</div>
+            <div class="query">${entry.query}</div>
+            <div class="response">${entry.response.substring(0, 100)}${entry.response.length > 100 ? '...' : ''}</div>
+        `;
+
+        historyList.appendChild(item);
+    });
+}
+
+function loadHistoryItem(entry) {
+    // Could implement replaying or loading previous conversations
+    console.log('Loading history item:', entry);
+}
+
+function clearAllHistory() {
+    if (confirm('Are you sure you want to clear all chat history?')) {
+        chatHistoryData = [];
+        conversationContext = [];
+        saveChatHistory();
+        updateHistoryDisplay();
+    }
+}
+
+function exportChatHistory() {
+    const data = JSON.stringify(chatHistoryData, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat-history-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Context Memory
+function updateConversationContext(query, response) {
+    conversationContext.push({ query, response });
+
+    // Keep only recent context
+    if (conversationContext.length > MAX_CONTEXT_LENGTH) {
+        conversationContext = conversationContext.slice(-MAX_CONTEXT_LENGTH);
+    }
+}
+
+function getContextualResponse(userMessage) {
+    // Check if this is a follow-up question based on context
+    const lowerMessage = userMessage.toLowerCase();
+
+    // Simple context awareness - can be enhanced
+    for (let entry of conversationContext.slice(-3)) {
+        if (entry.response.includes('calculate') && (lowerMessage.includes('what') || lowerMessage.includes('again'))) {
+            return "I can help you with more calculations! What would you like to calculate?";
+        }
+    }
+
+    return null;
+}
+
+// Theme Management
+function loadThemePreference() {
+    const savedTheme = localStorage.getItem('voiceAI_theme') || 'dark';
+    setTheme(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.classList.contains('light-theme') ? 'dark' : 'light';
+    setTheme(currentTheme);
+}
+
+function setTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.classList.add('light-theme');
+        themeToggle.textContent = '☀️';
+    } else {
+        document.documentElement.classList.remove('light-theme');
+        themeToggle.textContent = '🌙';
+    }
+
+    localStorage.setItem('voiceAI_theme', theme);
+}
+
+// Search Suggestions
+function setupSearchSuggestions() {
+    let selectedIndex = -1;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        if (query.length < 2) {
+            suggestions.classList.add('hidden');
+            return;
+        }
+
+        const filtered = searchSuggestions.filter(suggestion =>
+            suggestion.toLowerCase().includes(query)
+        );
+
+        if (filtered.length > 0) {
+            suggestions.innerHTML = filtered.map((suggestion, index) =>
+                `<div class="suggestion-item" data-index="${index}">${suggestion}</div>`
+            ).join('');
+            suggestions.classList.remove('hidden');
+            selectedIndex = -1;
+        } else {
+            suggestions.classList.add('hidden');
+        }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        const items = suggestions.querySelectorAll('.suggestion-item');
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+            updateSuggestionHighlight();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, -1);
+            updateSuggestionHighlight();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedIndex >= 0 && items[selectedIndex]) {
+                // Use selected suggestion
+                const selectedItem = items[selectedIndex];
+                searchInput.value = selectedItem.textContent;
+                suggestions.classList.add('hidden');
+                processUserInput(selectedItem.textContent);
+                searchInput.value = ''; // Clear input after processing
+            } else if (searchInput.value.trim()) {
+                // Use typed text
+                const query = searchInput.value.trim();
+                suggestions.classList.add('hidden');
+                processUserInput(query);
+                searchInput.value = ''; // Clear input after processing
+            }
+            selectedIndex = -1;
+        } else if (e.key === 'Escape') {
+            suggestions.classList.add('hidden');
+            selectedIndex = -1;
+        }
+    });
+
+    suggestions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggestion-item')) {
+            const query = e.target.textContent;
+            searchInput.value = query;
+            suggestions.classList.add('hidden');
+            processUserInput(query);
+            searchInput.value = ''; // Clear input after processing
+        }
+    });
+
+    function updateSuggestionHighlight() {
+        const items = suggestions.querySelectorAll('.suggestion-item');
+        items.forEach((item, index) => {
+            if (index === selectedIndex) {
+                item.classList.add('highlighted');
+            } else {
+                item.classList.remove('highlighted');
+            }
+        });
+    }
+}
+
+// Voice Commands
+function processVoiceCommands(message) {
+    const lowerMessage = message.toLowerCase();
+
+    if (lowerMessage.includes('change language') || lowerMessage.includes('भाषा बदलें')) {
+        const newLang = currentLang === 'en' ? 'hi' : 'en';
+        currentLang = newLang;
+        langSelect.value = newLang;
+        updateUI();
+
+        if (recognition) {
+            recognition.language = newLang === 'hi' ? 'hi-IN' : 'en-US';
+        }
+
+        const response = newLang === 'hi' ? 'भाषा हिंदी में बदल दी गई है' : 'Language changed to English';
+        return response;
+    }
+
+    if (lowerMessage.includes('clear history') || lowerMessage.includes('इतिहास साफ करें')) {
+        clearAllHistory();
+        return currentLang === 'hi' ? 'चैट इतिहास साफ कर दिया गया है' : 'Chat history cleared';
+    }
+
+    if (lowerMessage.includes('toggle theme') || lowerMessage.includes('थीम बदलें')) {
+        toggleTheme();
+        const isLight = document.documentElement.classList.contains('light-theme');
+        return isLight ? 'Light theme activated' : 'Dark theme activated';
+    }
+
+    return null;
+}
+
+// Setup Event Listeners
+function setupEventListeners() {
+    // Theme toggle
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // History panel
+    historyBtn.addEventListener('click', () => {
+        chatHistory.classList.toggle('hidden');
+    });
+
+    closeHistory.addEventListener('click', () => {
+        chatHistory.classList.add('hidden');
+    });
+
+    clearHistory.addEventListener('click', clearAllHistory);
+    exportHistory.addEventListener('click', exportChatHistory);
+
+    // Search suggestions
+    setupSearchSuggestions();
+
+    // Settings (placeholder for now)
+    settingsBtn.addEventListener('click', () => {
+        alert('Settings panel coming soon!');
+    });
+
+    // Click outside to close panels
+    document.addEventListener('click', (e) => {
+        if (!chatHistory.contains(e.target) && !historyBtn.contains(e.target)) {
+            chatHistory.classList.add('hidden');
+        }
+
+        if (!suggestions.contains(e.target) && e.target !== searchInput) {
+            suggestions.classList.add('hidden');
+        }
+    });
+}

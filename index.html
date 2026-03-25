@@ -3,11 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Smart voice-controlled AI assistant with offline support">
+    <link rel="manifest" href="manifest.json">
     <title>Local Voice AI Assistant</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container" id="main-container" style="display: none;">
+        <!-- Particle Canvas -->
+        <canvas id="particleCanvas" class="particle-canvas"></canvas>
+        
+        <!-- Header with controls -->
+        <div class="header-controls">
+            <button id="themeToggle" class="control-btn" title="Toggle Theme">🌙</button>
+            <button id="historyBtn" class="control-btn" title="Chat History">📊</button>
+            <button id="settingsBtn" class="control-btn" title="Settings">⚙️</button>
+        </div>
+
+        <!-- Chat History Panel -->
+        <div id="chatHistory" class="chat-history hidden">
+            <div class="history-header">
+                <h3>Chat History</h3>
+                <button id="closeHistory" class="close-btn">✕</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+            <div class="history-actions">
+                <button id="clearHistory" class="action-btn clear">Clear History</button>
+                <button id="exportHistory" class="action-btn export">Export</button>
+            </div>
+        </div>
+
         <!-- Main Voice Control -->
         <div class="voice-interface">
             <div class="user-info">
@@ -16,6 +42,12 @@
             </div>
             <div class="logo">🎤</div>
             <h1 id="title">Voice AI Assistant</h1>
+            
+            <!-- Search Suggestions -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Type to search suggestions...">
+                <div id="suggestions" class="suggestions hidden"></div>
+            </div>
             
             <div class="status-display">
                 <p id="status">Click mic to start speaking...</p>
